@@ -1,0 +1,41 @@
+name: Fetch IBJA rates
+
+# Runs daily to scrape the latest IBJA gold/silver rates and commit any new rows.
+# Replaces the local scheduled task so it runs even when the laptop is closed.
+on:
+  schedule:
+    # 13:08 UTC ≈ 18:38 IST — matches the original local task slot.
+    - cron: "8 13 * * *"
+  workflow_dispatch: {}
+
+# Allow the built-in GITHUB_TOKEN to push commits back to the repo.
+permissions:
+  contents: write
+
+# Never run two fetches at once; let the in-progress one finish.
+concurrency:
+  group: fetch-rates
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install "pdfplumber>=0.11,<0.12"
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch and commit rates
+        run: python3 fetch_rates.py
