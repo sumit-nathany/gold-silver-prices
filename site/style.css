@@ -204,6 +204,12 @@ footer {
 
 footer a { color: var(--text-dim); }
 
+footer .disclaimer {
+  max-width: 480px;
+  margin: 8px auto 0;
+  opacity: 0.8;
+}
+
 @media (max-width: 480px) {
   header h1 { font-size: 1.3rem; }
   #themeToggle { top: 16px; right: 12px; width: 32px; height: 32px; }

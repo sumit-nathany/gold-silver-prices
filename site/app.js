@@ -93,46 +93,110 @@ function filterByRange(rows, rangeValue) {
   return rows.filter((r) => r.date >= cutoffStr);
 }
 
+function pctChangeSeries(values) {
+  const base = values.find((v) => v !== null);
+  if (base === undefined || base === null) return values.map(() => null);
+  return values.map((v) => (v === null ? null : ((v - base) / base) * 100));
+}
+
 function renderChart() {
   const metal = document.getElementById("metal").value;
   const range = document.getElementById("range").value;
-  const rows = filterByRange(allRows, range).filter((r) => r[metal] !== null);
-
-  const labels = rows.map((r) => r.date);
-  const data = rows.map((r) => r[metal]);
-  const color = metal === "gold" ? "#d4af37" : "#8a8f99";
 
   const ctx = document.getElementById("priceChart").getContext("2d");
   if (chart) chart.destroy();
-  chart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: metal === "gold" ? "Gold 999" : "Silver 999",
-          data,
-          borderColor: color,
-          backgroundColor: "transparent",
-          borderWidth: 2,
-          pointRadius: 0,
-          tension: 0,
+
+  if (metal === "both") {
+    const rows = filterByRange(allRows, range).filter((r) => r.gold !== null && r.silver !== null);
+    const labels = rows.map((r) => r.date);
+    const goldPct = pctChangeSeries(rows.map((r) => r.gold));
+    const silverPct = pctChangeSeries(rows.map((r) => r.silver));
+
+    chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Gold 999",
+            data: goldPct,
+            borderColor: "#d4af37",
+            backgroundColor: "transparent",
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0,
+          },
+          {
+            label: "Silver 999",
+            data: silverPct,
+            borderColor: "#8a8f99",
+            backgroundColor: "transparent",
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        scales: {
+          x: { ticks: { color: "var(--text-dim)", maxTicksLimit: 8 }, grid: { color: "var(--border)" } },
+          y: {
+            ticks: {
+              color: "var(--text-dim)",
+              callback: (v) => `${v > 0 ? "+" : ""}${v}%`,
+            },
+            grid: { color: "var(--border)" },
+          },
         },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: "index", intersect: false },
-      scales: {
-        x: { ticks: { color: "var(--text-dim)", maxTicksLimit: 8 }, grid: { color: "var(--border)" } },
-        y: { ticks: { color: "var(--text-dim)" }, grid: { color: "var(--border)" } },
+        plugins: {
+          legend: { labels: { color: "var(--text)" } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y > 0 ? "+" : ""}${ctx.parsed.y.toFixed(2)}%`,
+            },
+          },
+        },
       },
-      plugins: {
-        legend: { labels: { color: "var(--text)" } },
+    });
+  } else {
+    const rows = filterByRange(allRows, range).filter((r) => r[metal] !== null);
+    const labels = rows.map((r) => r.date);
+    const data = rows.map((r) => r[metal]);
+    const color = metal === "gold" ? "#d4af37" : "#8a8f99";
+
+    chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: metal === "gold" ? "Gold 999" : "Silver 999",
+            data,
+            borderColor: color,
+            backgroundColor: "transparent",
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0,
+          },
+        ],
       },
-    },
-  });
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        scales: {
+          x: { ticks: { color: "var(--text-dim)", maxTicksLimit: 8 }, grid: { color: "var(--border)" } },
+          y: { ticks: { color: "var(--text-dim)" }, grid: { color: "var(--border)" } },
+        },
+        plugins: {
+          legend: { labels: { color: "var(--text)" } },
+        },
+      },
+    });
+  }
   applyChartTheme();
 }
 
