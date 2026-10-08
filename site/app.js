@@ -13,7 +13,7 @@ async function fetchYearCsv(year) {
 }
 
 function parseCsv(text) {
-  const lines = text.trim().split("\n");
+  const lines = text.trim().split(/\r?\n/);
   const headers = lines[0].split(",");
   return lines.slice(1).map((line) => {
     const cells = line.split(",");
@@ -37,10 +37,8 @@ async function loadAllData() {
     .flat()
     .map((r) => ({
       date: r.date,
-      gold_am: toNum(r.gold_999_am),
-      gold_pm: toNum(r.gold_999_pm),
-      silver_am: toNum(r.silver_999_am),
-      silver_pm: toNum(r.silver_999_pm),
+      gold: toNum(r.gold_999_pm),
+      silver: toNum(r.silver_999_pm),
       reason: r.reason || "",
     }))
     .sort((a, b) => a.date.localeCompare(b.date));
@@ -52,7 +50,7 @@ function formatInr(n) {
 }
 
 function renderCards() {
-  const tradingRows = allRows.filter((r) => r.gold_pm !== null);
+  const tradingRows = allRows.filter((r) => r.gold !== null);
   const cardsEl = document.getElementById("cards");
   if (tradingRows.length === 0) {
     cardsEl.innerHTML = '<div class="card">No data available</div>';
@@ -81,10 +79,8 @@ function renderCards() {
   };
 
   cardsEl.innerHTML = [
-    makeCard(`Gold 999 PM (${latest.date})`, latest.gold_pm, prev?.gold_pm, "per 10g"),
-    makeCard(`Gold 999 AM (${latest.date})`, latest.gold_am, prev?.gold_am, "per 10g"),
-    makeCard(`Silver 999 PM (${latest.date})`, latest.silver_pm, prev?.silver_pm, "per kg"),
-    makeCard(`Silver 999 AM (${latest.date})`, latest.silver_am, prev?.silver_am, "per kg"),
+    makeCard(`Gold 999 (${latest.date})`, latest.gold, prev?.gold, "per 10g"),
+    makeCard(`Silver 999 (${latest.date})`, latest.silver, prev?.silver, "per kg"),
   ].join("");
 }
 
@@ -100,12 +96,11 @@ function filterByRange(rows, rangeValue) {
 function renderChart() {
   const metal = document.getElementById("metal").value;
   const range = document.getElementById("range").value;
-  const rows = filterByRange(allRows, range).filter((r) => r[`${metal}_pm`] !== null);
+  const rows = filterByRange(allRows, range).filter((r) => r[metal] !== null);
 
   const labels = rows.map((r) => r.date);
-  const amData = rows.map((r) => r[`${metal}_am`]);
-  const pmData = rows.map((r) => r[`${metal}_pm`]);
-  const color = metal === "gold" ? "#d4af37" : "#c0c0c8";
+  const data = rows.map((r) => r[metal]);
+  const color = metal === "gold" ? "#d4af37" : "#8a8f99";
 
   const ctx = document.getElementById("priceChart").getContext("2d");
   if (chart) chart.destroy();
@@ -115,18 +110,8 @@ function renderChart() {
       labels,
       datasets: [
         {
-          label: "AM",
-          data: amData,
-          borderColor: color,
-          backgroundColor: "transparent",
-          borderWidth: 1.5,
-          borderDash: [4, 3],
-          pointRadius: 0,
-          tension: 0,
-        },
-        {
-          label: "PM",
-          data: pmData,
+          label: metal === "gold" ? "Gold 999" : "Silver 999",
+          data,
           borderColor: color,
           backgroundColor: "transparent",
           borderWidth: 2,
@@ -137,16 +122,18 @@ function renderChart() {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       interaction: { mode: "index", intersect: false },
       scales: {
-        x: { ticks: { color: "#9a9ea8", maxTicksLimit: 10 }, grid: { color: "#2a2e38" } },
-        y: { ticks: { color: "#9a9ea8" }, grid: { color: "#2a2e38" } },
+        x: { ticks: { color: "var(--text-dim)", maxTicksLimit: 8 }, grid: { color: "var(--border)" } },
+        y: { ticks: { color: "var(--text-dim)" }, grid: { color: "var(--border)" } },
       },
       plugins: {
-        legend: { labels: { color: "#e8e8ea" } },
+        legend: { labels: { color: "var(--text)" } },
       },
     },
   });
+  applyChartTheme();
 }
 
 function renderTable() {
@@ -154,26 +141,79 @@ function renderTable() {
   const rowsDesc = [...allRows].reverse();
   tbody.innerHTML = rowsDesc
     .map((r) => {
-      const isNonTrading = r.gold_am === null && r.gold_pm === null;
+      const isNonTrading = r.gold === null && r.silver === null;
       if (isNonTrading) {
         return `<tr class="non-trading">
           <td>${r.date}</td>
-          <td colspan="4">${r.reason}</td>
+          <td colspan="2">${r.reason}</td>
         </tr>`;
       }
       const note = r.reason ? ` title="${r.reason}"` : "";
       return `<tr${note}>
         <td>${r.date}</td>
-        <td>${formatInr(r.gold_am)}</td>
-        <td>${formatInr(r.gold_pm)}</td>
-        <td>${formatInr(r.silver_am)}</td>
-        <td>${formatInr(r.silver_pm)}${r.reason ? " *" : ""}</td>
+        <td>${formatInr(r.gold)}</td>
+        <td>${formatInr(r.silver)}${r.reason ? " *" : ""}</td>
       </tr>`;
     })
     .join("");
 }
 
+function getStoredTheme() {
+  try {
+    return localStorage.getItem("theme");
+  } catch {
+    return null;
+  }
+}
+
+function storeTheme(theme) {
+  try {
+    localStorage.setItem("theme", theme);
+  } catch {
+    /* ignore */
+  }
+}
+
+function applyChartTheme() {
+  if (!chart) return;
+  const styles = getComputedStyle(document.documentElement);
+  const textDim = styles.getPropertyValue("--text-dim").trim();
+  const border = styles.getPropertyValue("--border").trim();
+  const text = styles.getPropertyValue("--text").trim();
+  chart.options.scales.x.ticks.color = textDim;
+  chart.options.scales.x.grid.color = border;
+  chart.options.scales.y.ticks.color = textDim;
+  chart.options.scales.y.grid.color = border;
+  chart.options.plugins.legend.labels.color = text;
+  chart.update();
+}
+
+function setTheme(theme) {
+  const root = document.documentElement;
+  if (theme === "light") {
+    root.setAttribute("data-theme", "light");
+  } else {
+    root.removeAttribute("data-theme");
+  }
+  document.getElementById("themeToggle").textContent = theme === "light" ? "☀️" : "🌙";
+  storeTheme(theme);
+  applyChartTheme();
+}
+
+function initTheme() {
+  const stored = getStoredTheme();
+  const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+  const initial = stored || (prefersLight ? "light" : "dark");
+  setTheme(initial);
+
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+    setTheme(current === "light" ? "dark" : "light");
+  });
+}
+
 async function init() {
+  initTheme();
   await loadAllData();
   renderCards();
   renderChart();

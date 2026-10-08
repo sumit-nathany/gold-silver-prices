@@ -9,8 +9,9 @@
 </head>
 <body>
   <header>
+    <button id="themeToggle" aria-label="Toggle dark/light mode" title="Toggle theme">🌙</button>
     <h1>Gold &amp; Silver Rates</h1>
-    <p class="subtitle">Daily IBJA 999 rates (INR, ex-GST) &middot; <a href="https://ibjarates.com" target="_blank" rel="noopener">ibjarates.com</a></p>
+    <p class="subtitle">Daily IBJA 999 closing rates (INR, ex-GST) &middot; <a href="https://ibjarates.com" target="_blank" rel="noopener">ibjarates.com</a></p>
   </header>
 
   <main>
@@ -38,7 +39,7 @@
     </section>
 
     <section class="chart-wrap">
-      <canvas id="priceChart" height="100"></canvas>
+      <canvas id="priceChart"></canvas>
     </section>
 
     <section class="table-wrap">
@@ -46,10 +47,8 @@
         <thead>
           <tr>
             <th>Date</th>
-            <th>Gold AM</th>
-            <th>Gold PM</th>
-            <th>Silver AM</th>
-            <th>Silver PM</th>
+            <th>Gold</th>
+            <th>Silver</th>
           </tr>
         </thead>
         <tbody></tbody>
