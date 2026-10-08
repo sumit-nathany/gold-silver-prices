@@ -1,0 +1,162 @@
+:root {
+  --gold: #b8860b;
+  --silver: #708090;
+  --bg: #0f1115;
+  --panel: #171a21;
+  --border: #2a2e38;
+  --text: #e8e8ea;
+  --text-dim: #9a9ea8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+header {
+  padding: 24px 20px 8px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0 0 4px;
+  font-size: 1.6rem;
+}
+
+.subtitle {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.subtitle a { color: var(--text-dim); }
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 20px 40px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.card .label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.card .value {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.card .delta {
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.delta.up { color: #4caf50; }
+.delta.down { color: #e05252; }
+.delta.flat { color: var(--text-dim); }
+
+.controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.control-group label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+select {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+}
+
+.chart-wrap {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.table-wrap {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: auto;
+  max-height: 420px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+  text-align: right;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+thead th:first-child { text-align: left; }
+
+tbody td {
+  text-align: right;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+tbody td:first-child { text-align: left; color: var(--text-dim); }
+
+tbody tr.non-trading td:not(:first-child) {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+footer a { color: var(--text-dim); }

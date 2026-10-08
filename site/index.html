@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gold &amp; Silver Rates — IBJA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Gold &amp; Silver Rates</h1>
+    <p class="subtitle">Daily IBJA 999 rates (INR, ex-GST) &middot; <a href="https://ibjarates.com" target="_blank" rel="noopener">ibjarates.com</a></p>
+  </header>
+
+  <main>
+    <section id="cards" class="cards">
+      <div class="card" id="card-loading">Loading latest rates&hellip;</div>
+    </section>
+
+    <section class="controls">
+      <div class="control-group">
+        <label for="metal">Metal</label>
+        <select id="metal">
+          <option value="gold">Gold 999</option>
+          <option value="silver">Silver 999</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="range">Range</label>
+        <select id="range">
+          <option value="30">Last 30 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="365" selected>Last 1 year</option>
+          <option value="all">All time</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="chart-wrap">
+      <canvas id="priceChart" height="100"></canvas>
+    </section>
+
+    <section class="table-wrap">
+      <table id="ratesTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Gold AM</th>
+            <th>Gold PM</th>
+            <th>Silver AM</th>
+            <th>Silver PM</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    <p>Data fetched daily from IBJA via GitHub Actions &middot; <a href="https://github.com/sumit-nathany/gold-silver-prices" target="_blank" rel="noopener">source</a></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
